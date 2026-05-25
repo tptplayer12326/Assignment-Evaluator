@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GradeAI — Intelligent Assignment Evaluator</title>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+
+    body{
+      background:#f4f8ff;
+      color:#1b2b45;
+      padding:40px;
+    }
+
+    .container{
+      max-width:900px;
+      margin:auto;
+      background:white;
+      border-radius:16px;
+      padding:32px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    h1{
+      color:#1565c0;
+      margin-bottom:10px;
+    }
+
+    p.subtitle{
+      margin-bottom:30px;
+      color:#5b6b84;
+    }
+
+    label{
+      display:block;
+      margin-top:20px;
+      margin-bottom:8px;
+      font-weight:bold;
+    }
+
+    textarea{
+      width:100%;
+      min-height:220px;
+      padding:15px;
+      border-radius:12px;
+      border:1px solid #cfd8dc;
+      resize:vertical;
+      font-size:15px;
+    }
+
+    button{
+      margin-top:25px;
+      background:#1976d2;
+      color:white;
+      border:none;
+      padding:14px 24px;
+      border-radius:10px;
+      font-size:16px;
+      cursor:pointer;
+      transition:0.2s;
+    }
+
+    button:hover{
+      background:#0d5cb6;
+    }
+
+    .results{
+      margin-top:35px;
+      padding:25px;
+      border-radius:14px;
+      background:#eef5ff;
+      display:none;
+    }
+
+    .score{
+      font-size:42px;
+      font-weight:bold;
+      color:#1565c0;
+      margin-bottom:20px;
+    }
+
+    .section{
+      margin-bottom:18px;
+    }
+
+    .section h3{
+      margin-bottom:8px;
+      color:#0d47a1;
+    }
+
+    ul{
+      padding-left:20px;
+    }
+
+    .footer{
+      margin-top:30px;
+      text-align:center;
+      color:#6c7a89;
+      font-size:14px;
+    }
+
+    .badge{
+      display:inline-block;
+      background:#1976d2;
+      color:white;
+      padding:6px 12px;
+      border-radius:20px;
+      margin-bottom:20px;
+      font-size:14px;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="badge">AI-Powered Evaluation</div>
+
+    <h1>GradeAI — Intelligent Assignment Evaluator</h1>
+
+    <p class="subtitle">
+      Paste a student assignment below to receive an automatic grade,
+      feedback summary, strengths, and improvement suggestions.
+    </p>
+
+    <label for="assignment">Student Assignment</label>
+
+    <textarea id="assignment" placeholder="Paste assignment text here..."></textarea>
+
+    <button onclick="evaluateAssignment()">Evaluate Assignment</button>
+
+    <div class="results" id="results">
+
+      <div class="score" id="scoreDisplay">0%</div>
+
+      <div class="section">
+        <h3>Overall Feedback</h3>
+        <p id="overallFeedback"></p>
+      </div>
+
+      <div class="section">
+        <h3>Strengths</h3>
+        <ul id="strengths"></ul>
+      </div>
+
+      <div class="section">
+        <h3>Areas for Improvement</h3>
+        <ul id="improvements"></ul>
+      </div>
+
+      <div class="section">
+        <h3>Writing Metrics</h3>
+        <p id="metrics"></p>
+      </div>
+
+    </div>
+
+    <div class="footer">
+      GradeAI © 2026 — Intelligent Assignment Evaluation System
+    </div>
+
+  </div>
+
+  <script>
+
+    function evaluateAssignment() {
+
+      const text = document.getElementById("assignment").value.trim();
+
+      if(text.length === 0){
+        alert("Please paste an assignment first.");
+        return;
+      }
+
+      const wordCount = text.split(/\s+/).length;
+      const sentenceCount = text.split(/[.!?]+/).filter(Boolean).length;
+
+      let score = 50;
+
+      const strengths = [];
+      const improvements = [];
+
+      // Word Count Evaluation
+      if(wordCount > 500){
+        score += 20;
+        strengths.push("Strong assignment length and detail.");
+      } else if(wordCount > 250){
+        score += 10;
+        strengths.push("Good overall content development.");
+      } else {
+        improvements.push("Add more detail and explanation.");
+      }
+
+      // Sentence Structure
+      if(sentenceCount > 10){
+        score += 10;
+        strengths.push("Uses multiple supporting sentences.");
+      } else {
+        improvements.push("Expand ideas into fuller paragraphs.");
+      }
+
+      // Keyword Analysis
+      const academicWords = [
+        "analysis",
+        "research",
+        "evidence",
+        "conclusion",
+        "therefore",
+        "however",
+        "because",
+        "argument"
+      ];
+
+      let academicHits = 0;
+
+      academicWords.forEach(word => {
+        if(text.toLowerCase().includes(word)){
+          academicHits++;
+        }
+      });
+
+      if(academicHits >= 4){
+        score += 15;
+        strengths.push("Demonstrates academic writing vocabulary.");
+      } else {
+        improvements.push("Use more analytical and academic language.");
+      }
+
+      // Grammar Approximation
+      const grammarIssues = (text.match(/\bi\b/g) || []).length;
+
+      if(grammarIssues === 0){
+        score += 5;
+        strengths.push("Good capitalization and writing conventions.");
+      } else {
+        improvements.push("Review capitalization and grammar usage.");
+      }
+
+      // Clamp Score
+      if(score > 100) score = 100;
+
+      // Grade Label
+      let feedback = "";
+
+      if(score >= 90){
+        feedback = "Excellent work with strong organization, detail, and academic tone.";
+      } else if(score >= 75){
+        feedback = "Good assignment with clear effort and understanding shown.";
+      } else if(score >= 60){
+        feedback = "Satisfactory work, but additional development is needed.";
+      } else {
+        feedback = "Assignment needs significant improvement in clarity and detail.";
+      }
+
+      // Fallback Items
+      if(strengths.length === 0){
+        strengths.push("Assignment submitted successfully.");
+      }
+
+      if(improvements.length === 0){
+        improvements.push("Minor proofreading could further strengthen the work.");
+      }
+
+      // Display Results
+      document.getElementById("results").style.display = "block";
+
+      document.getElementById("scoreDisplay").innerText = score + "%";
+
+      document.getElementById("overallFeedback").innerText = feedback;
+
+      document.getElementById("metrics").innerText =
+        `Word Count: ${wordCount} | Sentences: ${sentenceCount} | Academic Keywords: ${academicHits}`;
+
+      // Strengths
+      const strengthsList = document.getElementById("strengths");
+      strengthsList.innerHTML = "";
+
+      strengths.forEach(item => {
+        const li = document.createElement("li");
+        li.innerText = item;
+        strengthsList.appendChild(li);
+      });
+
+      // Improvements
+      const improvementsList = document.getElementById("improvements");
+      improvementsList.innerHTML = "";
+
+      improvements.forEach(item => {
+        const li = document.createElement("li");
+        li.innerText = item;
+        improvementsList.appendChild(li);
+      });
+
+    }
+
+  </script>
+
+</body>
+</html>
